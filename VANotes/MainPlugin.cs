@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
+using System.Speech.Recognition;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -15,6 +17,8 @@ namespace VANotes
         private const string NotesFoundKey = "notesFound";
         private const string NoteResultKey = "note";
         private const string ChoiceIdKey = "noteChoices";
+        private const string SearchTermKey = "noteSearchTerm";
+        private const double ConfidenceLevel = 0.0;
 
         private static readonly Guid PluginId = new Guid("120A82D5-A747-446D-B5E7-6EC175B39B6D");
         private static OneNote.Application _oneNote;
@@ -85,7 +89,34 @@ namespace VANotes
         {
             var choices = (Choice[]) state[ChoiceIdKey];
 
-            ReadNote(textValues, choices[0].Id);
+            var grammar = new GrammarBuilder();
+            string[] choicesIndexes = Enumerable.Range(1, choices.Length).Select(i => i.ToString()).ToArray();
+
+            grammar.Append(new Choices(choicesIndexes));
+
+            using (var recognizer = new SpeechRecognitionEngine(CultureInfo.CurrentUICulture))
+            {
+                recognizer.LoadGrammar(new Grammar(grammar));
+                recognizer.SetInputToDefaultAudioDevice();
+
+                PlayBeep();
+                var result = recognizer.Recognize();
+
+                if (result != null && result.Confidence > ConfidenceLevel)
+                {
+                    string res = result.Text;
+                    int index;
+                    if (int.TryParse(res, out index))
+                    {
+                        ReadNote(textValues, choices[index - 1].Id);
+                    }
+                }
+            }
+        }
+
+        private static void PlayBeep()
+        {
+            System.Media.SystemSounds.Beep.Play();
         }
 
         private static void SearchNote(Dictionary<string, object> state, Dictionary<string, short?> conditions,
@@ -93,9 +124,18 @@ namespace VANotes
         {
 
             string start = null;
-            string searchTerm = "trade";
+            string searchTerm = GetDictation();
             string result;
-            
+
+
+            textValues[SearchTermKey] = searchTerm;
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                conditions[NotesFoundKey] = -1;
+                return;
+            }
+
             _oneNote.FindPages(start, searchTerm, out result, false, false, OneNote.XMLSchema.xs2013);
 
             try
@@ -125,6 +165,34 @@ namespace VANotes
             {
                 
             }
+        }
+
+        private static string GetDictation()
+        {
+            try
+            {
+                using (var engine = new SpeechRecognitionEngine(CultureInfo.CurrentUICulture))
+                {
+                    var grammar = new DictationGrammar {Name = "default dictation", Enabled = true};
+                    engine.LoadGrammar(grammar);
+                    grammar.SetDictationContext("Search for", null);
+
+                    engine.SetInputToDefaultAudioDevice();
+                    PlayBeep();
+                    var result = engine.Recognize();
+
+                    if (result != null && result.Confidence > ConfidenceLevel)
+                    {
+                        return result.Text;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                
+            }
+
+            return null;
         }
 
         private static void ReadChoices(Dictionary<string, object> state, Dictionary<string, string> textValues, IList<Choice> foundIds)
