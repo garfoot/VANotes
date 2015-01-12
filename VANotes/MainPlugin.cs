@@ -204,7 +204,7 @@ namespace VANotes
             int i = 1;
             foreach (var choice in foundIds)
             {
-                choices.AppendFormat("{0}. {1}\r\n", i++, choice.Name);
+                choices.AppendFormat("Item {0}\r\n {1}\r\n", i++, choice.Name);
             }
 
             textValues[NoteResultKey] = choices.ToString();
