@@ -44,6 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Choice.cs" />
+    <Compile Include="Commands\SearchNoteCommand.cs" />
+    <Compile Include="Commands\SelectChoiceCommand.cs" />
+    <Compile Include="DelegateEqualityComparer.cs" />
+    <Compile Include="IPluginCommand.cs" />
+    <Compile Include="Keys.cs" />
     <Compile Include="MainPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
