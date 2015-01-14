@@ -51,26 +51,6 @@ namespace VANotes
             }
         }
 
-        /// <summary>
-        ///     This function is where you will do all of your work. When VoiceAttack encounters an 'Execute External Plugin Function'
-        ///     action, the plugin indicated will be called.
-        /// </summary>
-        /// <param name="context">
-        ///     A string that can be anything you want it to be. This is passed in from the command action.
-        ///     This was added to allow you to just pass a value into the plugin in a simple fashion
-        ///     (without having to set conditions/text values beforehand). Convert the string to whatever type you need to.
-        /// </param>
-        /// <param name="state">
-        ///     All values from the state maintained by VoiceAttack for this plugin. The state allows you to maintain
-        ///     kind of a, 'session' within VoiceAttack. This value is not persisted to disk and will be erased on restart.
-        ///     Other plugins do not have access to this state (private to the plugin).
-        /// 
-        ///     The state dictionary is the complete state. You can manipulate it however you want,
-        ///     the whole thing will be copied back and replace what VoiceAttack is holding on to.
-        /// </param>
-        /// <param name="conditions">The conditions that were specified in the 'Execute External' command action.</param>
-        /// <param name="textValues">The text values that were specified in the 'Execute External' command action.</param>
-        /// <param name="extendedValues">Reserved, will be null.</param>
         public static void VA_Invoke1(string context, ref Dictionary<string, object> state,
             ref Dictionary<string, Int16?> conditions,
             ref Dictionary<string, string> textValues, ref Dictionary<string, object> extendedValues)
