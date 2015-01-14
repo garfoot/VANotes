@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using VANotes.Notebooks;
 
 namespace VANotes
 {
@@ -10,6 +11,8 @@ namespace VANotes
 
         private static readonly Guid PluginId = new Guid("120A82D5-A747-446D-B5E7-6EC175B39B6D");
         private static Dictionary<string, IPluginCommand> _pluginCommands;
+        private static VoiceAttack _voiceAttack;
+        private static INotebook _notebook;
 
         public static string VA_DisplayName()
         {
@@ -29,6 +32,9 @@ namespace VANotes
         public static void VA_Init1(ref Dictionary<string, object> state, ref Dictionary<string, Int16?> conditions,
                                     ref Dictionary<string, string> textValues, ref Dictionary<string, object> extendedValues)
         {
+            _voiceAttack = new VoiceAttack(state, textValues, conditions);
+            _notebook = new OneNoteNotebook();
+
             _pluginCommands = Assembly.GetExecutingAssembly().DefinedTypes
                 .Where(t => t.ImplementedInterfaces.Contains(typeof (IPluginCommand)))
                 .Select(Activator.CreateInstance)
@@ -39,7 +45,7 @@ namespace VANotes
 
             foreach (var command in _pluginCommands)
             {
-                command.Value.Init(state, conditions, textValues);
+                command.Value.Init(_voiceAttack, _notebook);
             }
         }
 
@@ -55,22 +61,12 @@ namespace VANotes
             ref Dictionary<string, Int16?> conditions,
             ref Dictionary<string, string> textValues, ref Dictionary<string, object> extendedValues)
         {
-            Clear(conditions, textValues);
+            _voiceAttack.PrepareInvoke(context, state, conditions, textValues);
 
             if (_pluginCommands.ContainsKey(context))
             {
-                _pluginCommands[context].Invoke(state, conditions, textValues);
+                _pluginCommands[context].Invoke();
             }
-        }
-
-
-        private static void Clear(Dictionary<string, short?> conditions, Dictionary<string, string> textValues)
-        {
-            if (conditions.ContainsKey(Keys.NotesFoundKey))
-                conditions.Remove(Keys.NotesFoundKey);
-
-            if (textValues.ContainsKey(Keys.NoteResultKey))
-                conditions.Remove(Keys.NoteResultKey);
         }
     }
 }
