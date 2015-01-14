@@ -15,8 +15,11 @@ namespace VANotes
 
         private static class TextKeys
         {
+            public const string NoteText = "VANotes.NoteText";
+            public const string DictationText = "VANotes.DictationText";
             public const string SayText = "VANotes.SayText";
             public const string SearchTerm = "VANotes.SearchTerm";
+            public const string NoteName = "VANotes.NoteName";
         }
 
         private static class ConditionKeys
@@ -30,13 +33,6 @@ namespace VANotes
             public const string Choices = "VANotes.Choices";
         }
 
-
-        public VoiceAttack(Dictionary<string, object> state, Dictionary<string, string> textValues, Dictionary<string, short?> conditions)
-        {
-            _state = state;
-            _textValues = textValues;
-            _conditions = conditions;
-        }
 
         public IList<Choice> Choices
         {
@@ -62,10 +58,64 @@ namespace VANotes
 
                 return null;
             }
-            private set
+            set
             {
                 _textValues[TextKeys.SearchTerm]  = value;
             }
+        }
+
+        public string DictationText
+        {
+            get
+            {
+                if (_textValues.ContainsKey(TextKeys.DictationText))
+                    return _textValues[TextKeys.DictationText];
+
+                return null;
+            }
+            set
+            {
+                _textValues[TextKeys.DictationText] = value;
+            }
+        }
+
+        public string NoteName
+        {
+            get
+            {
+                if (_textValues.ContainsKey(TextKeys.NoteName))
+                    return _textValues[TextKeys.NoteName];
+
+                return null;
+            }
+            set
+            {
+                _textValues[TextKeys.NoteName] = value;
+            }
+        }
+
+        public string NoteText
+        {
+            get
+            {
+                if (_textValues.ContainsKey(TextKeys.NoteText))
+                    return _textValues[TextKeys.NoteText];
+
+                return null;
+            }
+            set
+            {
+                _textValues[TextKeys.NoteText] = value;
+            }
+
+        }
+
+
+        public VoiceAttack(Dictionary<string, object> state, Dictionary<string, string> textValues, Dictionary<string, short?> conditions)
+        {
+            _state = state;
+            _textValues = textValues;
+            _conditions = conditions;
         }
 
         public void Say(string text)
@@ -83,24 +133,18 @@ namespace VANotes
             _conditions[ConditionKeys.NotesFoundCount] = (short)count;
         }
 
-        public string AskForSearchTerm()
-        {
-            SearchTerm = GetDictation();
-
-            return SearchTerm;
-        }
-
-        private string GetDictation()
+        public string GetDictation(bool playBeep = true, string precedingText = null, string subsequentText = null)
         {
             using (var engine = new SpeechRecognitionEngine(CultureInfo.CurrentUICulture))
             {
                 var grammar = new DictationGrammar { Name = "default dictation", Enabled = true };
                 engine.LoadGrammar(grammar);
-                grammar.SetDictationContext("Search for", null);
+                grammar.SetDictationContext(precedingText, subsequentText);
 
                 engine.SetInputToDefaultAudioDevice();
                 
-                PlayBeep();
+                if(playBeep)
+                    PlayBeep();
                 
                 var result = engine.Recognize();
 
@@ -110,7 +154,7 @@ namespace VANotes
                 }
             }
 
-            return null;
+            return subsequentText;
         }
 
         public void PlayBeep()
@@ -133,6 +177,8 @@ namespace VANotes
 
             if (conditions.ContainsKey(ConditionKeys.ErrorCode))
                 conditions.Remove(ConditionKeys.ErrorCode);
+
+            // Don't clear dictation text as that might be needed across multiple invokes.
         }
     }
 }

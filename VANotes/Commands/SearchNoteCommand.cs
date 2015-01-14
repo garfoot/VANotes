@@ -20,23 +20,22 @@ namespace VANotes.Commands
             _notebook = notebook;
         }
 
-        public void Terminate(Dictionary<string, object> state)
+        public void Terminate()
         {
         }
 
         public void Invoke()
         {
-            string searchTerm = _voiceAttack.AskForSearchTerm();
+            _voiceAttack.SearchTerm = _voiceAttack.GetDictation(precedingText: "Search for");
 
-
-            if (string.IsNullOrWhiteSpace(searchTerm))
+            if (string.IsNullOrWhiteSpace(_voiceAttack.SearchTerm))
             {
                 _voiceAttack.Error(-1);
 
                 return;
             }
 
-            IList<Choice> choices = _notebook.FindPages(searchTerm);
+            IList<Choice> choices = _notebook.FindPages(_voiceAttack.SearchTerm);
 
             _voiceAttack.FoundPages(choices.Count);
 

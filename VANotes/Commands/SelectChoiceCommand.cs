@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Speech.Recognition;
@@ -22,7 +21,7 @@ namespace VANotes.Commands
             _voiceAttack = voiceAttack;
         }
 
-        public void Terminate(Dictionary<string, object> state)
+        public void Terminate()
         {
         }
 

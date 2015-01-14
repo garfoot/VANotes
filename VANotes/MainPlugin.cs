@@ -53,7 +53,7 @@ namespace VANotes
         {
             foreach (var command in _pluginCommands)
             {
-                command.Value.Terminate(state);
+                command.Value.Terminate();
             }
         }
 

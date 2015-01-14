@@ -44,8 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Choice.cs" />
+    <Compile Include="Commands\GetDictationCommand.cs" />
     <Compile Include="Commands\SearchNoteCommand.cs" />
     <Compile Include="Commands\SelectChoiceCommand.cs" />
+    <Compile Include="Commands\TakeNoteCommand.cs" />
     <Compile Include="DelegateEqualityComparer.cs" />
     <Compile Include="IPluginCommand.cs" />
     <Compile Include="MainPlugin.cs" />
